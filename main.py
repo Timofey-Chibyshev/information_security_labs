@@ -2,7 +2,6 @@ import re
 import matplotlib.pyplot as plt
 from collections import Counter
 
-# Референсные частоты букв с учётом "ё"
 russian_letter_frequencies = {
     'о': 10.97, 'е': 8.45, 'а': 8.01, 'и': 7.35, 'н': 6.70,
     'т': 6.26, 'с': 5.47, 'р': 4.73, 'в': 4.54, 'л': 4.40,
@@ -48,10 +47,8 @@ def true_freqs():
 
 
 def plot_frequencies(ref_freq, text_freq, title1, title2):
-    # Сортируем символы по порядку из эталонных частот
     sorted_chars = list(ref_freq.keys())
 
-    # Создаем списки значений частот в одинаковом порядке
     ref_values = [ref_freq[char] for char in sorted_chars]
     text_values = [text_freq.get(char, 0) for char in sorted_chars]
 
@@ -61,13 +58,13 @@ def plot_frequencies(ref_freq, text_freq, title1, title2):
     plt.bar(sorted_chars, ref_values, color='skyblue')
     plt.title(title1)
     plt.xticks(rotation=45)
-    plt.ylim(0, max(ref_values) * 1.1)  # Автомасштаб по Y
+    plt.ylim(0, max(ref_values) * 1.1)
 
     plt.subplot(1, 2, 2)
     plt.bar(sorted_chars, text_values, color='lightgreen')
     plt.title(title2)
     plt.xticks(rotation=45)
-    plt.ylim(0, max(text_values) * 1.1 if text_values else 0)  # Автомасштаб по Y
+    plt.ylim(0, max(text_values) * 1.1 if text_values else 0)
 
     plt.tight_layout()
     plt.show()
@@ -134,13 +131,12 @@ def decrypt_vigenere(text, key):
     key_idx = 0
     result = []
 
-    # Генерируем ключ только для буквенных символов
     for char in text:
         if char in alphabet:
             key_repeated.append(key[key_idx % len(key)])
             key_idx += 1
         else:
-            key_repeated.append(None)  # Маркер для не-букв
+            key_repeated.append(None)
 
     key_idx = 0
     for t_char, k_char in zip(text, key_repeated):
@@ -153,6 +149,15 @@ def decrypt_vigenere(text, key):
             result.append(t_char)
 
     return ''.join(result)
+
+
+def save_decrypted_text(text, save_path):
+    try:
+        with open(save_path, 'w', encoding='utf-8') as file:
+            file.write(decrypted)
+        print(f"Текст успешно сохранен в файл: {save_path}")
+    except Exception as e:
+        print(f"Ошибка при сохранении файла: {e}")
 
 
 if __name__ == '__main__':
@@ -176,5 +181,9 @@ if __name__ == '__main__':
     print("\nПервые 500 символов расшифрованного текста:")
     print(decrypted[:500])
 
-    decrypted_text_freqs = calculate_freqs(process_raw_text(raw_text)[1])
+    save_decrypted_text(decrypted, input("\nВведите путь для сохранения расшифрованного текста: "))
+
+    _, decrypted_clean = process_raw_text(decrypted)
+    decrypted_text_freqs = calculate_freqs(decrypted_clean)
     plot_frequencies(ref_freq, decrypted_text_freqs, 'Эталонные частоты', 'Частоты в декодированном тексте')
+    
